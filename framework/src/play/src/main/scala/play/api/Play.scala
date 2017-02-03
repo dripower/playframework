@@ -50,7 +50,21 @@ object Play {
   /*
    * A parser to be used that is configured to ensure that no schemas are loaded.
    */
-  private[play] def XML = scala.xml.XML.withSAXParser(xercesSaxParserFactory.newSAXParser())
+  val xmlHolder = new ThreadLocal[XMLLoader[Elem]]
+  def XML = {
+    val xmlObj = xmlHolder.get()
+    if(xmlHolder.get() == null) {
+      newXmlObj()
+    } else {
+      xmlObj
+    }
+  }
+
+  private def newXMLObj() = {
+    val newXmlObj =  scala.xml.XML.withSAXParser(xercesSaxParserFactory.newSAXParser())
+    xmlHolder.put(newXmlObj)
+    newXmlObj
+  }
 
   /**
    * Returns the currently running application, or `null` if not defined.
